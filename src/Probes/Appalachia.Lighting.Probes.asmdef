@@ -1,0 +1,27 @@
+{
+    "name": "Appalachia.Lighting.Probes",
+    "rootNamespace": "",
+    "references": [
+        "GUID:195705ddaa6fe6c42a576177c5d36a5c",
+        "GUID:873f913f34eb2c34385d17b9a87f21b9",
+        "GUID:4c32fdd75da6bc94f9b79f03f11f5e30",
+        "GUID:cf75d8bea22d8fb469a2aa239cfc6930",
+        "GUID:61d5c5627f609f946a4c3771484d27dd",
+        "GUID:4478509a2a02c3644b5cb3c831aca378",
+        "GUID:030cdfbdf31bdb14dae55d9c2249171b",
+        "GUID:77e5466b8e149524e866bc8a5ebdef0a",
+        "GUID:fb58d5396d4f85044a40c7548929c37d",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:e4a2dcef324d74d418aeaa12e10a02fb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
