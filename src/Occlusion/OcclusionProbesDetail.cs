@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
-using Appalachia.Core.Editing;
+using Appalachia.Editing.Debugging;
 using UnityEngine;
 
-namespace Appalachia.Core.Lighting.Occlusion
+namespace Appalachia.Lighting.Occlusion
 {
     public class OcclusionProbesDetail : MonoBehaviour {
 

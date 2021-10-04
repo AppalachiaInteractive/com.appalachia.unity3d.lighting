@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Appalachia.Core.Collections;
 using Appalachia.Core.Collections.Implementations.Lists;
-using Appalachia.Core.Editing.Attributes;
-using Appalachia.Core.Terrains.Utilities;
+using Appalachia.Editing.Attributes;
+using Appalachia.Spatial.Terrains.Utilities;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 
 #endif
 
-namespace Appalachia.Core.Lighting.Probes
+namespace Appalachia.Lighting.Probes
 {
     [ExecuteAlways]
     public abstract class AutomaticLightProbeGroup : MonoBehaviour

@@ -1,14 +1,15 @@
-using Appalachia.Core.AssetMetadata.Options;
 using Appalachia.Core.Collections;
-using Appalachia.Core.Rendering;
-using Appalachia.Core.Rendering.Runtime;
+using Appalachia.Prefabs.Core;
+using Appalachia.Prefabs.Rendering;
+using Appalachia.Prefabs.Rendering.Runtime;
 using UnityEditor;
 using UnityEngine;
+
 #if UNITY_EDITOR
 
 #endif
 
-namespace Appalachia.Core.Lighting.Probes
+namespace Appalachia.Lighting.Probes
 {
     public class PrefabRenderingManagerAutomaticLightProbeGroup : AutomaticLightProbeGroup
     {

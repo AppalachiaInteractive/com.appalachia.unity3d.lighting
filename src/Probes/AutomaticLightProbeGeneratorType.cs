@@ -1,4 +1,4 @@
-namespace Appalachia.Core.Lighting.Probes
+namespace Appalachia.Lighting.Probes
 {
     public enum AutomaticLightProbeGeneratorType
     {

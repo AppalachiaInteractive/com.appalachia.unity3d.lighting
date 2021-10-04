@@ -4,11 +4,12 @@ using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 #if UNITY_EDITOR
 
 #endif
 
-namespace Appalachia.Core.Lighting.Probes
+namespace Appalachia.Lighting.Probes
 {
     [ExecuteAlways]
     public class AutomaticLightProbeProxyVolume : MonoBehaviour

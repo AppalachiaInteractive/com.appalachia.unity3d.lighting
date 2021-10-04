@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Appalachia.Core.Lighting.Occlusion
+namespace Appalachia.Lighting.Occlusion
 {
 	public class OcclusionProbeData : ScriptableObject
 	{

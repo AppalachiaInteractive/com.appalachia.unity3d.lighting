@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
-using Appalachia.Core.Lighting.Occlusion;
-using Appalachia.Core.Visualizers.Base;
+using Appalachia.Editing.Visualizers.Base;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Appalachia.Core.Visualizers.Occlusion
+namespace Appalachia.Lighting.Occlusion.Visualizers
 {
     [ExecuteAlways]
     public class OcclusionProbeTester : InstancedIndirectVolumeVisualization

@@ -1,13 +1,13 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using Appalachia.Core.Editing;
+using Appalachia.Editing.Debugging;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Appalachia.Core.Lighting.Occlusion
+namespace Appalachia.Lighting.Occlusion
 {
     public partial class OcclusionProbes : MonoBehaviour
     {

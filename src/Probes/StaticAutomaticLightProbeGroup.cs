@@ -3,11 +3,12 @@ using Appalachia.Core.Collections;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
+
 #if UNITY_EDITOR
 
 #endif
 
-namespace Appalachia.Core.Lighting.Probes
+namespace Appalachia.Lighting.Probes
 {
     public class StaticAutomaticLightProbeGroup : AutomaticLightProbeGroup
     {
