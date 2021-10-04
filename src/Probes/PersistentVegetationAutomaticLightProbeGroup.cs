@@ -25,26 +25,32 @@ namespace Appalachia.Lighting.Probes
 
         protected override void RecreateTargetList()
         {
-
         }
 
-        protected override void GenerateProbesForTargets(AppaList<Vector3> points, ref bool canceled)
+        protected override void GenerateProbesForTargets(
+            AppaList<Vector3> points,
+            ref bool canceled)
         {
             var systemList = VegetationStudioManager.Instance.VegetationSystemList;
-            if (systemList == null || systemList.Count == 0) return;
-
-            var system = systemList[0];
-            
-            if (system == null ||
-                system.PersistentVegetationStorage == null ||
-                system.PersistentVegetationStorage.PersistentVegetationStoragePackage == null)
+            if ((systemList == null) || (systemList.Count == 0))
             {
                 return;
             }
-            
+
+            var system = systemList[0];
+
+            if ((system == null) ||
+                (system.PersistentVegetationStorage == null) ||
+                (system.PersistentVegetationStorage.PersistentVegetationStoragePackage == null))
+            {
+                return;
+            }
+
             var veggieInfos = new Dictionary<string, VegetationItemInfoPro>();
 
-            for (var packageIndex = 0; packageIndex < system.VegetationPackageProList.Count; packageIndex++)
+            for (var packageIndex = 0;
+                packageIndex < system.VegetationPackageProList.Count;
+                packageIndex++)
             {
                 var package = system.VegetationPackageProList[packageIndex];
                 for (var vegIndex = 0; vegIndex < package.VegetationInfoList.Count; vegIndex++)
@@ -53,9 +59,10 @@ namespace Appalachia.Lighting.Probes
                     veggieInfos.Add(info.VegetationItemID, info);
                 }
             }
-            
-            foreach (var cell in system.PersistentVegetationStorage.PersistentVegetationStoragePackage
-                .PersistentVegetationCellList)
+
+            foreach (var cell in system.PersistentVegetationStorage
+                                       .PersistentVegetationStoragePackage
+                                       .PersistentVegetationCellList)
             {
                 foreach (var info in cell.PersistentVegetationInfoList)
                 {
@@ -74,7 +81,7 @@ namespace Appalachia.Lighting.Probes
                     {
                         itemCount += 1;
 
-                        if (itemCount % logStep == 0)
+                        if ((itemCount % logStep) == 0)
                         {
                             canceled = EditorUtility.DisplayCancelableProgressBar(
                                 $"AutoProbe: Generating Light Probes ({gameObject.name})",

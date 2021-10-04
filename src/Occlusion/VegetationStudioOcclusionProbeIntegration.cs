@@ -38,9 +38,12 @@ namespace Appalachia.Lighting.Occlusion
 
                 //var systemCount = manager.VegetationSystemList.Count;
                 var cellCount = manager.VegetationSystemList.Sum(s => s.VegetationCellList.Count);
+
                 //var packageCount = manager.VegetationSystemList.Sum(vsl => vsl.VegetationPackageProList.Count);
 
-                var infoCount = manager.VegetationSystemList.Sum(vsl => vsl.VegetationPackageProList.Sum(vpp => vpp.VegetationInfoList.Count));
+                var infoCount = manager.VegetationSystemList.Sum(
+                    vsl => vsl.VegetationPackageProList.Sum(vpp => vpp.VegetationInfoList.Count)
+                );
 
                 var infoSum = 0;
 
@@ -82,7 +85,9 @@ namespace Appalachia.Lighting.Occlusion
 
                 Debug.LogWarning("Building matrix lookup from storage.");
 
-                var instances = new Dictionary<VegetationItemInfoPro, (GameObject prefab, HashSet<Matrix4x4> matrices)>();
+                var instances =
+                    new Dictionary<VegetationItemInfoPro, (GameObject prefab, HashSet<Matrix4x4>
+                        matrices)>();
 
                 var cellSum = 0;
 
@@ -115,7 +120,9 @@ namespace Appalachia.Lighting.Occlusion
                         {
                             cancellation = cancellation ||
                                            EditorUtility.DisplayCancelableProgressBar(
-                                               "Getting matrices from storage: Cell [" + cellSum + "]",
+                                               "Getting matrices from storage: Cell [" +
+                                               cellSum +
+                                               "]",
                                                $"{cellSum}/{cellCount}",
                                                cellSum / (float) cellCount
                                            );
@@ -130,14 +137,19 @@ namespace Appalachia.Lighting.Occlusion
                         for (var infoIndex = 0; infoIndex < itemInfoList.Count; infoIndex++)
                         {
                             var itemInfo = itemInfoList[infoIndex];
-                            var info = storage.VegetationSystemPro.GetVegetationItemInfo(itemInfo.VegetationItemID);
+                            var info =
+                                storage.VegetationSystemPro.GetVegetationItemInfo(
+                                    itemInfo.VegetationItemID
+                                );
 
                             if ((info == null) || !info.EnableOcclusionBake)
                             {
                                 continue;
                             }
 
-                            for (var itemIndex = 0; itemIndex < itemInfo.VegetationItemList.Count; itemIndex++)
+                            for (var itemIndex = 0;
+                                itemIndex < itemInfo.VegetationItemList.Count;
+                                itemIndex++)
                             {
                                 var vegetationItem = itemInfo.VegetationItemList[itemIndex];
                                 var itemMatrix = Matrix4x4.TRS(
@@ -159,13 +171,19 @@ namespace Appalachia.Lighting.Occlusion
                     }
                 }
 
-                for (var systemIndex = 0; systemIndex < manager.VegetationSystemList.Count; systemIndex++)
+                for (var systemIndex = 0;
+                    systemIndex < manager.VegetationSystemList.Count;
+                    systemIndex++)
                 {
                     var system = manager.VegetationSystemList[systemIndex];
-                    for (var packageIndex = 0; packageIndex < system.VegetationPackageProList.Count; packageIndex++)
+                    for (var packageIndex = 0;
+                        packageIndex < system.VegetationPackageProList.Count;
+                        packageIndex++)
                     {
                         var package = system.VegetationPackageProList[packageIndex];
-                        for (var infoIndex = 0; infoIndex < package.VegetationInfoList.Count; infoIndex++)
+                        for (var infoIndex = 0;
+                            infoIndex < package.VegetationInfoList.Count;
+                            infoIndex++)
                         {
                             var info = package.VegetationInfoList[infoIndex];
                             infoSum += 1;
@@ -174,7 +192,8 @@ namespace Appalachia.Lighting.Occlusion
                             {
                                 cancellation = cancellation ||
                                                EditorUtility.DisplayCancelableProgressBar(
-                                                   "Getting matrices from spawn settings: " + info.Name,
+                                                   "Getting matrices from spawn settings: " +
+                                                   info.Name,
                                                    $"{infoSum}/{infoCount}",
                                                    infoSum / (float) infoCount
                                                );
@@ -199,12 +218,20 @@ namespace Appalachia.Lighting.Occlusion
                                     instances.Add(info, (prefab, new HashSet<Matrix4x4>()));
                                 }
 
-                                for (var cellIndex = 0; cellIndex < system.VegetationCellList.Count; cellIndex++)
+                                for (var cellIndex = 0;
+                                    cellIndex < system.VegetationCellList.Count;
+                                    cellIndex++)
                                 {
                                     var vegetationCell = system.VegetationCellList[cellIndex];
-                                    system.SpawnVegetationCell(vegetationCell, info.VegetationItemID);
+                                    system.SpawnVegetationCell(
+                                        vegetationCell,
+                                        info.VegetationItemID
+                                    );
 
-                                    var vegetationInstanceList = system.GetVegetationItemInstances(vegetationCell, info.VegetationItemID);
+                                    var vegetationInstanceList = system.GetVegetationItemInstances(
+                                        vegetationCell,
+                                        info.VegetationItemID
+                                    );
 
                                     for (var j = 0; j <= (vegetationInstanceList.Length - 1); j++)
                                     {
@@ -243,7 +270,9 @@ namespace Appalachia.Lighting.Occlusion
                         if (!Application.isPlaying && ((instanceSum % logThreshold) == 0))
                         {
                             cancellation = EditorUtility.DisplayCancelableProgressBar(
-                                "Deploying instances to scene: [" + instance.Value.prefab.name + "]",
+                                "Deploying instances to scene: [" +
+                                instance.Value.prefab.name +
+                                "]",
                                 $"{instanceSum}/{instanceCount}",
                                 instanceSum / (float) instanceCount
                             );
@@ -259,7 +288,10 @@ namespace Appalachia.Lighting.Occlusion
 
                         if (instantiated == null)
                         {
-                            instantiated = PrefabUtility.InstantiatePrefab(prefab, occlusionBakeObjects.transform) as GameObject;
+                            instantiated = PrefabUtility.InstantiatePrefab(
+                                prefab,
+                                occlusionBakeObjects.transform
+                            ) as GameObject;
                             go = instantiated;
                         }
                         else
@@ -348,7 +380,11 @@ namespace Appalachia.Lighting.Occlusion
                     {
                         if (!Application.isPlaying)
                         {
-                            EditorUtility.DisplayProgressBar("Deleting occlusion bake items", $"Spawn cell {i}/{children}", i / (float) children);
+                            EditorUtility.DisplayProgressBar(
+                                "Deleting occlusion bake items",
+                                $"Spawn cell {i}/{children}",
+                                i / (float) children
+                            );
                         }
                     }
 

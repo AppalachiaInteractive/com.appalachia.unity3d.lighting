@@ -25,11 +25,9 @@ namespace Appalachia.Lighting.Probes
         [OnValueChanged(nameof(OnNameChanged))]
         public string volumeName;
 
-        [Tooltip(
-            "The volume will encompass these objects."
-        )]
+        [Tooltip("The volume will encompass these objects.")]
         [SceneObjectsOnly]
-        public AppaList_GameObject encompassing = new AppaList_GameObject(12);
+        public AppaList_GameObject encompassing = new(12);
 
         [Tooltip("Should child objects be encompassed?")]
         [OnValueChanged(nameof(UpdateVolume))]
@@ -67,7 +65,7 @@ namespace Appalachia.Lighting.Probes
         {
             gameObject.name = string.Format(LightProbeGroupName, volumeName);
         }
-        
+
         public void Awake()
         {
             Validate();
@@ -75,9 +73,8 @@ namespace Appalachia.Lighting.Probes
 
         private void Validate()
         {
-        
             gameObject.name = string.Format(LightProbeGroupName, volumeName);
-            
+
             if (volume == null)
             {
                 volume = GetComponent<LightProbeProxyVolume>();
@@ -93,12 +90,13 @@ namespace Appalachia.Lighting.Probes
             t.localRotation = Quaternion.identity;
             t.localScale = Vector3.one;
         }
-        
+
         public void UpdateVolume()
         {
             Validate();
 
-            var boundsCollection = new NonSerializedList<(GameObject go, Bounds bounds, MeshRenderer mr)>(128);
+            var boundsCollection =
+                new NonSerializedList<(GameObject go, Bounds bounds, MeshRenderer mr)>(128);
 
             for (var i = encompassing.Count - 1; i >= 0; i--)
             {
@@ -139,7 +137,6 @@ namespace Appalachia.Lighting.Probes
                 }
             }
 
-
             var proxyBounds = new Bounds();
 
             for (var index = 0; index < boundsCollection.Count; index++)
@@ -163,8 +160,8 @@ namespace Appalachia.Lighting.Probes
                         continue;
                     }
 
-                    if (r.mr.lightProbeProxyVolumeOverride != null &&
-                        r.mr.lightProbeProxyVolumeOverride != volume.gameObject)
+                    if ((r.mr.lightProbeProxyVolumeOverride != null) &&
+                        (r.mr.lightProbeProxyVolumeOverride != volume.gameObject))
                     {
                         continue;
                     }
@@ -182,7 +179,7 @@ namespace Appalachia.Lighting.Probes
             volume.originCustom = transform.InverseTransformPoint(proxyBounds.center);
             volume.sizeCustom = proxyBounds.size;
             volume.refreshMode = LightProbeProxyVolume.RefreshMode.Automatic;
-            
+
             volume.probeDensity = density;
             volume.probePositionMode = positionMode;
             volume.qualityMode = qualityMode;

@@ -14,15 +14,17 @@ namespace Appalachia.Lighting.Probes
     {
 #if UNITY_EDITOR
 
-        [BoxGroup("Probe Limits"), LabelText("Is Budget Per Terrain")]
+        [BoxGroup("Probe Limits")]
+        [LabelText("Is Budget Per Terrain")]
         public bool budgetIsPerTerrain = true;
 
-        [BoxGroup("Probe Limits"), LabelText("Is Budget Per Terrain")]
+        [BoxGroup("Probe Limits")]
+        [LabelText("Is Budget Per Terrain")]
         [PropertyRange(8, 128)]
         public int gridDensity = 32;
-        
-        private readonly HashSet<Terrain> _terrains = new HashSet<Terrain>();
-        
+
+        private readonly HashSet<Terrain> _terrains = new();
+
         protected override bool ConsiderCollidables => false;
 
         protected override float GeometryBackoff => 5.0f;
@@ -51,21 +53,24 @@ namespace Appalachia.Lighting.Probes
             }
         }
 
-        protected override void GenerateProbesForTargets(AppaList<Vector3> points, ref bool canceled)
+        protected override void GenerateProbesForTargets(
+            AppaList<Vector3> points,
+            ref bool canceled)
         {
             //var count = 0;
-            foreach (var t in _terrains) // if terrains are selected, spawn at their vertex positions and above them.
+            foreach (var t in
+                _terrains) // if terrains are selected, spawn at their vertex positions and above them.
             {
                 for (var x = 0; x < gridDensity; x++)
                 {
                     for (var z = 0; z < gridDensity; z++)
                     {
                         var count = (float) ((x * gridDensity) + (z * gridDensity));
-                        var denominator = (float)(gridDensity * gridDensity);
+                        var denominator = (float) (gridDensity * gridDensity);
 
                         var progress = count / denominator;
 
-                        if (z % logStep == 0)
+                        if ((z % logStep) == 0)
                         {
                             canceled = EditorUtility.DisplayCancelableProgressBar(
                                 $"AutoProbe: Generating Light Probes ({gameObject.name})",
@@ -81,11 +86,15 @@ namespace Appalachia.Lighting.Probes
                         }
 
                         var wsPos = t.GetPosition() +
-                            new Vector3(
-                                (x / (float)gridDensity) * t.terrainData.heightmapScale.x * t.terrainData.heightmapResolution,
-                                0,
-                                (z / (float)gridDensity) * t.terrainData.heightmapScale.z * t.terrainData.heightmapResolution
-                            );
+                                    new Vector3(
+                                        (x / (float) gridDensity) *
+                                        t.terrainData.heightmapScale.x *
+                                        t.terrainData.heightmapResolution,
+                                        0,
+                                        (z / (float) gridDensity) *
+                                        t.terrainData.heightmapScale.z *
+                                        t.terrainData.heightmapResolution
+                                    );
                         wsPos.y += t.SampleHeight(wsPos) + GeometryBackoff;
 
                         if (IsInsideBounds(wsPos, false))

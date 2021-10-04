@@ -14,7 +14,7 @@ namespace Appalachia.Lighting.Probes
     {
 #if UNITY_EDITOR
 
-        protected readonly HashSet<MeshFilter> hash_meshFilters = new HashSet<MeshFilter>();
+        protected readonly HashSet<MeshFilter> hash_meshFilters = new();
 
         protected override bool ConsiderCollidables => false;
 
@@ -23,8 +23,9 @@ namespace Appalachia.Lighting.Probes
         protected override string LightProbeGroupName => "_STATIC_LIGHT_PROBE_GROUP";
 
         protected override int TargetCount => hash_meshFilters.Count;
-        
-        [BoxGroup("Vertex Placement"), LabelText("Test Points Per Mesh")]
+
+        [BoxGroup("Vertex Placement")]
+        [LabelText("Test Points Per Mesh")]
         [PropertyRange(4, 128)]
         public int maxVerticesPerMesh = 4;
 
@@ -49,10 +50,10 @@ namespace Appalachia.Lighting.Probes
                         var mr = go.GetComponent<MeshRenderer>();
                         var mf = go.GetComponent<MeshFilter>();
 
-                        if (mr != null && mf != null)
+                        if ((mr != null) && (mf != null))
                         {
                             hash_meshFilters.Add(mf);
-                            
+
                             var cs = go.GetComponents<Collider>();
 
                             foreach (var c in cs)
@@ -68,7 +69,9 @@ namespace Appalachia.Lighting.Probes
             }
         }
 
-        protected override void GenerateProbesForTargets(AppaList<Vector3> points, ref bool canceled)
+        protected override void GenerateProbesForTargets(
+            AppaList<Vector3> points,
+            ref bool canceled)
         {
             var count = 0;
 
@@ -94,8 +97,7 @@ namespace Appalachia.Lighting.Probes
 
                 int step;
 
-                step = (int) ((float)verts.Length / maxVerticesPerMesh);
-                
+                step = (int) ((float) verts.Length / maxVerticesPerMesh);
 
                 if (step < 1)
                 {
@@ -106,11 +108,11 @@ namespace Appalachia.Lighting.Probes
                 {
                     var v = verts[index];
                     var n = normals[index];
-                    
+
                     var pos = mf.transform.TransformPoint(v); // put v into world space
                     var nor = mf.transform.TransformDirection(n);
-                    
-                    pos += (nor*heightOffset);
+
+                    pos += nor * heightOffset;
 
                     if (IsInsideBounds(pos, false))
                     {

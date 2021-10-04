@@ -14,7 +14,7 @@ namespace Appalachia.Lighting.Probes
     {
 #if UNITY_EDITOR
 
-        protected readonly HashSet<MeshFilter> hash_meshFilters = new HashSet<MeshFilter>();
+        protected readonly HashSet<MeshFilter> hash_meshFilters = new();
 
         protected override bool ConsiderCollidables => true;
 
@@ -23,16 +23,19 @@ namespace Appalachia.Lighting.Probes
         protected override string LightProbeGroupName => "_DEFAULT_LIGHT_PROBE_GROUP";
 
         protected override int TargetCount => hash_meshFilters.Count;
-        
-        [BoxGroup("Vertex Placement"), LabelText("# of Vertices By Bounds")]
+
+        [BoxGroup("Vertex Placement")]
+        [LabelText("# of Vertices By Bounds")]
         public bool maxVerticesByBounds;
 
-        [BoxGroup("Vertex Placement"), LabelText("Points per Mesh")]
+        [BoxGroup("Vertex Placement")]
+        [LabelText("Points per Mesh")]
         [PropertyRange(4, 128)]
         [HideIf(nameof(maxVerticesByBounds))]
         public int maxVerticesPerMesh = 8;
-        
-        [BoxGroup("Vertex Placement"), LabelText("Points per (m) Mult.")]
+
+        [BoxGroup("Vertex Placement")]
+        [LabelText("Points per (m) Mult.")]
         [PropertyRange(0.1f, 3.0f)]
         [ShowIf(nameof(maxVerticesByBounds))]
         public float maxVerticesSizeMultiplier = 1.0f;
@@ -42,11 +45,11 @@ namespace Appalachia.Lighting.Probes
             // expand spawnObjects lists to include meshes, terrain, and colliders
             hash_meshFilters.Clear();
             colliders.Clear();
-            
-            for(var i = 0; i < collidables.Count; i++)
+
+            for (var i = 0; i < collidables.Count; i++)
             {
                 var collidable = boundsColliders[i];
-                
+
                 var mfs = collidable.GetComponents<MeshFilter>();
                 var cs = collidable.GetComponents<Collider>();
 
@@ -65,10 +68,10 @@ namespace Appalachia.Lighting.Probes
                         colliders.Add(c);
                     }
                 }
-                
+
                 mfs = collidable.GetComponentsInChildren<MeshFilter>();
                 cs = collidable.GetComponentsInChildren<Collider>();
-                
+
                 foreach (var mf in mfs)
                 {
                     if (cullingMask == (cullingMask | (1 << mf.gameObject.layer)))
@@ -87,14 +90,16 @@ namespace Appalachia.Lighting.Probes
             }
         }
 
-        protected override void GenerateProbesForTargets(AppaList<Vector3> points, ref bool canceled)
+        protected override void GenerateProbesForTargets(
+            AppaList<Vector3> points,
+            ref bool canceled)
         {
             var count = 0;
 
             // if meshes are selected, spawn at their vertex positions and above them.
             foreach (var mf in hash_meshFilters)
             {
-                if (count % logStep == 0)
+                if ((count % logStep) == 0)
                 {
                     canceled = EditorUtility.DisplayCancelableProgressBar(
                         $"AutoProbe: Generating Light Probes ({gameObject.name})",
@@ -118,7 +123,6 @@ namespace Appalachia.Lighting.Probes
 
                 if (verts.Length < maxVerticesPerMesh)
                 {
-                    
                 }
                 else if (maxVerticesByBounds)
                 {
@@ -128,7 +132,7 @@ namespace Appalachia.Lighting.Probes
                 }
                 else
                 {
-                    step = (int) ((float)verts.Length / maxVerticesPerMesh);
+                    step = (int) ((float) verts.Length / maxVerticesPerMesh);
                 }
 
                 if (step < 1)
@@ -140,11 +144,11 @@ namespace Appalachia.Lighting.Probes
                 {
                     var v = verts[index];
                     var n = normals[index];
-                    
+
                     var pos = mf.transform.TransformPoint(v); // put v into world space
                     var nor = mf.transform.TransformDirection(n);
-                    
-                    pos += (nor*heightOffset);
+
+                    pos += nor * heightOffset;
 
                     if (IsInsideBounds(pos, false))
                     {

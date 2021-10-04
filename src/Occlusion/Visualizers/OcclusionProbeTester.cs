@@ -48,7 +48,8 @@ namespace Appalachia.Lighting.Occlusion.Visualizers
 
             var bounds = new Bounds
             {
-                center = probesTransform.position, size = probesTransform.lossyScale + (Vector3.one * (visualizationSize * 3.0f))
+                center = probesTransform.position,
+                size = probesTransform.lossyScale + (Vector3.one * (visualizationSize * 3.0f))
             };
 
             return bounds;

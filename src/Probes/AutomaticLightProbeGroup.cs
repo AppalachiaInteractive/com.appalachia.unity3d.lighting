@@ -22,9 +22,9 @@ namespace Appalachia.Lighting.Probes
 #if UNITY_EDITOR
 
         protected static int logStep = 100;
-        
+
         private const int _LIST_SIZE = 128;
-        
+
         [HideInInspector] public LightProbeGroup lpg;
 
         [BoxGroup("Instance Lock")]
@@ -35,19 +35,20 @@ namespace Appalachia.Lighting.Probes
         [ReadOnly]
         [SmartLabel]
         public GameObject constraints;
-        
+
         [FoldoutGroup("Collisions/Bounds")]
         [ReadOnly]
         [ListDrawerSettings]
-        public AppaList_Collider boundsColliders = new AppaList_Collider(_LIST_SIZE);
+        public AppaList_Collider boundsColliders = new(_LIST_SIZE);
 
         [BoxGroup("Collisions")]
         [Tooltip(
             "Use MeshFilter and Terrain vertices to spawn light probes by dragging them (or a parent node) here. You can also set the maximum height relative to these meshes, so probes can be restricted to near-ground areas."
         )]
-        [SceneObjectsOnly, ShowIf(nameof(ConsiderCollidables))]
+        [SceneObjectsOnly]
+        [ShowIf(nameof(ConsiderCollidables))]
         [ListDrawerSettings]
-        public AppaList_GameObject collidables = new AppaList_GameObject(_LIST_SIZE);
+        public AppaList_GameObject collidables = new(_LIST_SIZE);
 
         protected abstract bool ConsiderCollidables { get; }
 
@@ -55,10 +56,11 @@ namespace Appalachia.Lighting.Probes
         [ToggleLeft]
         [SmartLabel]
         public bool allowBelowTerrain;
-        
-        [BoxGroup("Terrain")] 
+
+        [BoxGroup("Terrain")]
         [ToggleLeft]
-        [SmartLabel]public bool allowAboveTerrain = true;
+        [SmartLabel]
+        public bool allowAboveTerrain = true;
 
         [BoxGroup("Initial Placement")]
         [LabelText("Probe Algorithm")]
@@ -66,20 +68,25 @@ namespace Appalachia.Lighting.Probes
         [Tooltip(
             "Grid style spaces probes uniformly.  Spray style is more organic and explores spaces more organically."
         )]
-        public AutomaticLightProbeGeneratorType generatorAlgorithm = AutomaticLightProbeGeneratorType.Spray;
+        public AutomaticLightProbeGeneratorType generatorAlgorithm =
+            AutomaticLightProbeGeneratorType.Spray;
 
         private bool _showRayCount => generatorAlgorithm == AutomaticLightProbeGeneratorType.Spray;
 
         [BoxGroup("Initial Placement")]
         [LabelText("Rays Per Point")]
         [SmartLabel]
-        [Tooltip("Number of random rays cast per probe position, looking for valid spots to put new probes.")]
+        [Tooltip(
+            "Number of random rays cast per probe position, looking for valid spots to put new probes."
+        )]
         [PropertyRange(1.0f, 24.0f)]
         [ShowIf(nameof(_showRayCount))]
         public int rayCount = 10;
 
         private string _maxDistanceLabel =>
-            generatorAlgorithm == AutomaticLightProbeGeneratorType.Spray ? "Ray Length" : "Grid Size";
+            generatorAlgorithm == AutomaticLightProbeGeneratorType.Spray
+                ? "Ray Length"
+                : "Grid Size";
 
         [BoxGroup("Initial Placement")]
         [LabelText("$" + nameof(_maxDistanceLabel))]
@@ -135,10 +142,12 @@ namespace Appalachia.Lighting.Probes
         public float dataLength =>
             Lightmapping.lightingDataAsset == null
                 ? 0.0f
-                : new FileInfo(AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset)).Length / 1024.0f / 1024.0f;
+                : new FileInfo(AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset)).Length /
+                  1024.0f /
+                  1024.0f;
 
-        protected readonly HashSet<Collider> colliders = new HashSet<Collider>();
-        
+        protected readonly HashSet<Collider> colliders = new();
+
 // when a ray hits collision geometry, we step back this much so the light probe knows what side it's on
         protected abstract float GeometryBackoff { get; }
 
@@ -160,13 +169,13 @@ namespace Appalachia.Lighting.Probes
             Vector3.down,
             Vector3.right,
             Vector3.left,
-            new Vector3(1, 1, 1).normalized,
-            new Vector3(-1, 1, 1).normalized,
-            new Vector3(1, -1, 1).normalized,
-            new Vector3(1, 1, -1).normalized,
+            new Vector3(1,  1,  1).normalized,
+            new Vector3(-1, 1,  1).normalized,
+            new Vector3(1,  -1, 1).normalized,
+            new Vector3(1,  1,  -1).normalized,
             new Vector3(-1, -1, 1).normalized,
-            new Vector3(-1, 1, -1).normalized,
-            new Vector3(1, -1, -1).normalized,
+            new Vector3(-1, 1,  -1).normalized,
+            new Vector3(1,  -1, -1).normalized,
             new Vector3(-1, -1, -1).normalized
         };
 
@@ -175,12 +184,13 @@ namespace Appalachia.Lighting.Probes
 
         //-------------------
         // This finds all the known points within radius of pos and fills them out into the points list.
-        private readonly int[] sequence = {0, -1, 1}; // it's ideal to always check the center first, then look nearby
+        private readonly int[]
+            sequence = {0, -1, 1}; // it's ideal to always check the center first, then look nearby
 
         // To generate a hash for a coordinate where we WANT points near each other to collide, we simply divide each coordinate by the size of the coordinate "bucket",
         // and use those values to generate a hash value directly, storing the hash as the key and adding the point to the bucket.  When we request points
         // that are nearby, we simply look at all points in the vicinity of those buckets and do the distance check there, since it should be relatively few points anyway.
-        private readonly Dictionary<int, List<Vector3>> spatialHash = new Dictionary<int, List<Vector3>>();
+        private readonly Dictionary<int, List<Vector3>> spatialHash = new();
 
         private float
             resolution =
@@ -212,10 +222,9 @@ namespace Appalachia.Lighting.Probes
 
         private void ValidateConstraints()
         {
-
             if (boundsColliders == null)
             {
-                boundsColliders = new AppaList_Collider(_LIST_SIZE);                
+                boundsColliders = new AppaList_Collider(_LIST_SIZE);
             }
 
             boundsColliders.Clear();
@@ -286,10 +295,10 @@ namespace Appalachia.Lighting.Probes
             // this is due to misunderstanding
             var anyRealColliders = false;
 
-            for(var i = 0; i < boundsColliders.Count; i++)
+            for (var i = 0; i < boundsColliders.Count; i++)
             {
                 var c = boundsColliders[i];
-                
+
                 if ((c.enabled == false) || (c.gameObject.activeInHierarchy == false))
                 {
                     if (c is BoxCollider || c is SphereCollider || c is CapsuleCollider)
@@ -357,15 +366,19 @@ namespace Appalachia.Lighting.Probes
             coordinates[2] = Vector3.Dot(vap, Vector3.Cross(vad, vab)) * v6;
             coordinates[3] = Vector3.Dot(vap, Vector3.Cross(vab, vac)) * v6;
             return !((coordinates[0] < 0.0f) ||
-                (coordinates[1] < 0.0f) ||
-                (coordinates[2] < 0.0f) ||
-                (coordinates[3] < 0.0f)); // any negatives means coordinate is OUTSIDE, so not of that means inside.
+                     (coordinates[1] < 0.0f) ||
+                     (coordinates[2] < 0.0f) ||
+                     (coordinates[3] <
+                      0.0f)); // any negatives means coordinate is OUTSIDE, so not of that means inside.
         }
 
         public static float CompareSH(SphericalHarmonicsL2 a, SphericalHarmonicsL2 b)
         {
             var error = 0.0f; // return the summed error
-            a.Evaluate(directions, aColors); // RGB may be negative, in which case we want to treat it as zero.
+            a.Evaluate(
+                directions,
+                aColors
+            ); // RGB may be negative, in which case we want to treat it as zero.
             b.Evaluate(directions, bColors);
             for (var i = 0; i < directions.Length; i++)
             {
@@ -389,8 +402,8 @@ namespace Appalachia.Lighting.Probes
 
             // CIE76 method of DeltaE
             var err = ((aL - bL) * (aL - bL)) +
-                ((aa - ba) * (aa - ba)) +
-                ((ab - bb) * (ab - bb)); // Lab difference is simply euclidean distance
+                      ((aa - ba) * (aa - ba)) +
+                      ((ab - bb) * (ab - bb)); // Lab difference is simply euclidean distance
             return Mathf.Sqrt(err);
         }
 
@@ -448,7 +461,8 @@ namespace Appalachia.Lighting.Probes
                         var sc = c as SphereCollider;
                         if (sc != null)
                         {
-                            if (Vector3.SqrMagnitude(localPosition - sc.center) <= (sc.radius * sc.radius))
+                            if (Vector3.SqrMagnitude(localPosition - sc.center) <=
+                                (sc.radius * sc.radius))
                             {
                                 return true;
                             }
@@ -459,8 +473,10 @@ namespace Appalachia.Lighting.Probes
                         if (bc != null)
                         {
                             var delta = (localPosition - bc.center) +
-                                (bc.size * 0.5f); // offset the box by half the size, so we can do a quicker check below
-                            if (Vector3.Max(Vector3.zero, delta) == Vector3.Min(delta, bc.size)) // being (too?) clever
+                                        (bc.size *
+                                         0.5f); // offset the box by half the size, so we can do a quicker check below
+                            if (Vector3.Max(Vector3.zero, delta) ==
+                                Vector3.Min(delta, bc.size)) // being (too?) clever
                             {
                                 return true;
                             }
@@ -472,21 +488,25 @@ namespace Appalachia.Lighting.Probes
                         {
                             var cappedHeight = Mathf.Max(0.0f, cc.height - (cc.radius * 2.0f));
                             float distSqToPoint;
-                            if (cappedHeight > 0.0f) // normal case where it is actually shaped like a capsule
+                            if (cappedHeight >
+                                0.0f) // normal case where it is actually shaped like a capsule
                             {
                                 var axis = (cc.direction == 0
-                                        ? Vector3.right
-                                        : cc.direction == 1
-                                            ? Vector3.up
-                                            : Vector3.forward) *
-                                    cappedHeight;
+                                               ? Vector3.right
+                                               : cc.direction == 1
+                                                   ? Vector3.up
+                                                   : Vector3.forward) *
+                                           cappedHeight;
                                 var p1 = cc.center - (axis * 0.5f);
 
                                 // perform line test in capsule-space, where bottom capsule sphere is at 0,0,0
                                 var delta = localPosition - p1;
-                                var d = Mathf.Clamp01(Vector3.Dot(delta, axis) / (cappedHeight * cappedHeight));
+                                var d = Mathf.Clamp01(
+                                    Vector3.Dot(delta, axis) / (cappedHeight * cappedHeight)
+                                );
                                 var closestPointOnLine = p1 + (d * axis);
-                                distSqToPoint = Vector3.SqrMagnitude(closestPointOnLine - localPosition);
+                                distSqToPoint =
+                                    Vector3.SqrMagnitude(closestPointOnLine - localPosition);
                             }
                             else // degenerate case with height smaller than the radius of the capsule, making it a sphere
                             {
@@ -521,11 +541,11 @@ namespace Appalachia.Lighting.Probes
                     {
                         var zm = z + sequence[k];
                         var hash = (xm << 24) ^
-                            (xm >> 8) ^
-                            (ym << 16) ^
-                            (ym >> 16) ^
-                            (zm << 8) ^
-                            (zm >> 24); // probably not the world's best hash, but quick.
+                                   (xm >> 8) ^
+                                   (ym << 16) ^
+                                   (ym >> 16) ^
+                                   (zm << 8) ^
+                                   (zm >> 24); // probably not the world's best hash, but quick.
                         List<Vector3> o;
                         if (spatialHash.TryGetValue(hash, out o))
                         {
@@ -533,8 +553,10 @@ namespace Appalachia.Lighting.Probes
                             {
                                 var direction = v - pos;
                                 var distSq = direction.sqrMagnitude;
-                                if (distSq < Mathf.Epsilon
-                                ) // exact point is already in set, this ray is too close to an existing one (happens with grids most of the time)
+                                if (
+                                    distSq <
+                                    Mathf
+                                       .Epsilon) // exact point is already in set, this ray is too close to an existing one (happens with grids most of the time)
                                 {
                                     return true;
                                 }
@@ -554,7 +576,8 @@ namespace Appalachia.Lighting.Probes
                                         ) ==
                                         0)
                                     {
-                                        return true; // nothing is between these two points, so they're too close
+                                        return
+                                            true; // nothing is between these two points, so they're too close
                                     }
                                 }
                             }
@@ -629,7 +652,9 @@ namespace Appalachia.Lighting.Probes
 
             if (numhits == 0)
             {
-                activeList.Enqueue(newPos); // only consider new points that DON'T hit geometry as active
+                activeList.Enqueue(
+                    newPos
+                ); // only consider new points that DON'T hit geometry as active
             }
 
             allPoints.Add(newPos);
@@ -639,15 +664,17 @@ namespace Appalachia.Lighting.Probes
 
         protected abstract void RecreateTargetList();
 
-        protected abstract void GenerateProbesForTargets(AppaList<Vector3> points, ref bool canceled);
+        protected abstract void GenerateProbesForTargets(
+            AppaList<Vector3> points,
+            ref bool canceled);
 
         // Returns the count of new probes generated
         public int GenerateProbesInternal()
         {
             try
-            {                
+            {
                 ValidateConstraints();
-                
+
                 // Figure out where we can create probes.
                 if (HasDisabledChildColliders(true))
                 {
@@ -656,12 +683,12 @@ namespace Appalachia.Lighting.Probes
 
                 var probePositions = new Vector3[0];
                 var lpgDering = true;
-                
+
                 if (lpg == null)
                 {
                     lpg = GetComponent<LightProbeGroup>();
                 }
-                
+
                 if (lpg != null)
                 {
                     probePositions = lpg.probePositions;
@@ -672,7 +699,9 @@ namespace Appalachia.Lighting.Probes
 
                 RecreateTargetList();
 
-                InitializeSpatialHash(maxDistance); // resolution MUST be at least half the largest query size
+                InitializeSpatialHash(
+                    maxDistance
+                ); // resolution MUST be at least half the largest query size
 
                 var canceled = false;
 
@@ -711,10 +740,10 @@ namespace Appalachia.Lighting.Probes
                     }
 
                     // initialize with the center points of all the disabled colliders too
-                    for(var i = 0; i < boundsColliders.Count; i++)
+                    for (var i = 0; i < boundsColliders.Count; i++)
                     {
                         var c = boundsColliders[i];
-                        
+
                         positions.Add(c.bounds.center);
                         AddToSpatialHash(c.bounds.center);
                     }
@@ -730,7 +759,6 @@ namespace Appalachia.Lighting.Probes
                     {
                         FilterPointsFromTerrain(positions);
                     }
-
                 }
 
                 // Now, create an "active" set which we can work with, since a lot of probes will not be on the advancing surface.
@@ -740,13 +768,13 @@ namespace Appalachia.Lighting.Probes
                 {
                     active.Enqueue(positions[i]);
                 }
-                
+
                 var progressTotal = positions.Count;
                 var progress = 0;
 
                 while (!canceled && (active.Count > 0))
                 {
-                    if (progress % logStep == 0)
+                    if ((progress % logStep) == 0)
                     {
                         canceled = EditorUtility.DisplayCancelableProgressBar(
                             $"Generating Light Probes ({gameObject.name})",
@@ -773,7 +801,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.forward,
                                 distBetweenProbes,
                                 maxDistance
@@ -786,7 +818,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.back,
                                 distBetweenProbes,
                                 maxDistance
@@ -799,7 +835,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.right,
                                 distBetweenProbes,
                                 maxDistance
@@ -812,7 +852,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.left,
                                 distBetweenProbes,
                                 maxDistance
@@ -825,7 +869,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.up,
                                 distBetweenProbes,
                                 maxDistance
@@ -838,7 +886,11 @@ namespace Appalachia.Lighting.Probes
                                 active,
                                 positions,
                                 currentPoint,
-                                Quaternion.Euler(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f) *
+                                Quaternion.Euler(
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f,
+                                    Random.value - 0.5f
+                                ) *
                                 Vector3.down,
                                 distBetweenProbes,
                                 maxDistance
@@ -870,8 +922,8 @@ namespace Appalachia.Lighting.Probes
                                 }
                             }
 
-                            if (keepActive
-                            ) // in the case where a point generated a new adjacent point, there may yet be unexplored space nearby still, due to sampling error.  Keep trying.
+                            if (
+                                keepActive) // in the case where a point generated a new adjacent point, there may yet be unexplored space nearby still, due to sampling error.  Keep trying.
                             {
                                 active.Enqueue(currentPoint);
                                 progressTotal++;
@@ -949,6 +1001,7 @@ namespace Appalachia.Lighting.Probes
                 );
                 var initialProbes = probePositions.Length;
                 var p = new AppaList_Vector3(initialProbes);
+
                 //p.Capacity = initialProbes;
                 for (var i = 0; i < initialProbes; i++)
                 {
@@ -970,20 +1023,23 @@ namespace Appalachia.Lighting.Probes
                     "Moving to world space",
                     1.0f
                 );
-                
+
                 while (p.Count >= 5) // too few points means skip optimization.  Nothing to remove.
                 {
-                    
                     // Tetrahedralize the whole set of lightprobes, removing the junk points first.
                     int[] tetraIndices;
                     Vector3[] positions;
-                    
+
                     EditorUtility.DisplayCancelableProgressBar(
                         "AutoProbe: Optimizing Light Probes (" + gameObject.name + ")",
-                        "Generating tetrahedrons... Probes [" + initialProbes + "]  Removed [" + totalRemoved + "]",
+                        "Generating tetrahedrons... Probes [" +
+                        initialProbes +
+                        "]  Removed [" +
+                        totalRemoved +
+                        "]",
                         totalRemoved / (float) initialProbes
                     );
-                    
+
                     Lightmapping.Tetrahedralize(probePositions, out tetraIndices, out positions);
                     if (positions.Length != p.Count) // copy back the proper positions to be used
                     {
@@ -1009,8 +1065,11 @@ namespace Appalachia.Lighting.Probes
                     for (var i = 0; i < positions.Length; i++)
                     {
                         LightProbes.GetInterpolatedProbe(positions[i], null, out tempProbe);
-                        originalSH[i] = tempProbe; // cache all the original SH before we jack with them.
-                        adjacencyVerts.Add(new HashSet<int>()); // make space for all the verts-to-tetras lists.
+                        originalSH[i] =
+                            tempProbe; // cache all the original SH before we jack with them.
+                        adjacencyVerts.Add(
+                            new HashSet<int>()
+                        ); // make space for all the verts-to-tetras lists.
                     }
 
                     for (var i = 0; i < tetraIndices.Length; i += 4) // step by the tetrahedron
@@ -1054,12 +1113,14 @@ namespace Appalachia.Lighting.Probes
                         progress++;
 
                         var numAdjVerts = adjacencyVerts[i].Count;
-                        if (numAdjVerts > 4
-                        ) // can never remove a valence vertex from a tetrahedron.  There's no adjacency who can fill in for it
+                        if (
+                            numAdjVerts >
+                            4) // can never remove a valence vertex from a tetrahedron.  There's no adjacency who can fill in for it
                         {
                             // Skip optimizing this tetrahedron if any of my adjacencies are locked.
-                            if (locked.Contains(i) == false
-                            ) // only attempt optimizing this vertex away if this specific vertex is not yet locked by an adjacent optimization
+                            if (
+                                locked.Contains(i) ==
+                                false) // only attempt optimizing this vertex away if this specific vertex is not yet locked by an adjacent optimization
                             {
                                 // Since we already cached all the light probe SH's, we just need to try making new tetras that don't include p[i] so we can interpolate it from corners.
                                 var testPoints = new Vector3[numAdjVerts - 1];
@@ -1080,7 +1141,11 @@ namespace Appalachia.Lighting.Probes
                                 // compute new tetrahedrons from a small set of points, not including the one we're testing						
                                 int[] tetraIndices2;
                                 Vector3[] positions2;
-                                Lightmapping.Tetrahedralize(testPoints, out tetraIndices2, out positions2);
+                                Lightmapping.Tetrahedralize(
+                                    testPoints,
+                                    out tetraIndices2,
+                                    out positions2
+                                );
 
                                 // Now, find the tetrahedron that contains the missing vertex position, using 3D barycentric coordinates.
                                 var pos = p[i];
@@ -1094,8 +1159,14 @@ namespace Appalachia.Lighting.Probes
                                     var b = positions2[tetraIndices2[j + 1]];
                                     var c = positions2[tetraIndices2[j + 2]];
                                     var d = positions2[tetraIndices2[j + 3]];
-                                    if (IsInsideTetrahedron(a, b, c, d, pos, ref coordinates)
-                                    ) // we found the tetra that holds our test point
+                                    if (IsInsideTetrahedron(
+                                        a,
+                                        b,
+                                        c,
+                                        d,
+                                        pos,
+                                        ref coordinates
+                                    )) // we found the tetra that holds our test point
                                     {
                                         bestTetraIndex = j;
                                         break;
@@ -1119,27 +1190,33 @@ namespace Appalachia.Lighting.Probes
                                 }
 
                                 // without having to re-compute, just pull these from the array we fetched initially
-                                corners[0] = originalSH[originalIndices[tetraIndices2[bestTetraIndex + 0]]];
-                                corners[1] = originalSH[originalIndices[tetraIndices2[bestTetraIndex + 1]]];
-                                corners[2] = originalSH[originalIndices[tetraIndices2[bestTetraIndex + 2]]];
-                                corners[3] = originalSH[originalIndices[tetraIndices2[bestTetraIndex + 3]]];
+                                corners[0] =
+                                    originalSH[originalIndices[tetraIndices2[bestTetraIndex + 0]]];
+                                corners[1] =
+                                    originalSH[originalIndices[tetraIndices2[bestTetraIndex + 1]]];
+                                corners[2] =
+                                    originalSH[originalIndices[tetraIndices2[bestTetraIndex + 2]]];
+                                corners[3] =
+                                    originalSH[originalIndices[tetraIndices2[bestTetraIndex + 3]]];
 
                                 // Manually interpolating the Spherical Harmonic, we generate a new one and compare with what was baked.
                                 interpProbe = (corners[0] * coordinates[0]) +
-                                    (corners[1] * coordinates[1]) +
-                                    (corners[2] * coordinates[2]) +
-                                    (corners[3] * coordinates[3]);
+                                              (corners[1] * coordinates[1]) +
+                                              (corners[2] * coordinates[2]) +
+                                              (corners[3] * coordinates[3]);
 
                                 var error = CompareSH(interpProbe, originalSH[i]);
-                                if (((errorTolerance != -1.0f) && (error < errorTolerance)) || float.IsNaN(error)
-                                ) // always delete NaN errors, it means light probes are garbage
+                                if (((errorTolerance != -1.0f) && (error < errorTolerance)) ||
+                                    float.IsNaN(
+                                        error
+                                    )) // always delete NaN errors, it means light probes are garbage
                                 {
                                     //									Debug.Log("Error tolerance is reasonable for probe " + i + " Err: " + error);
                                     // Note, if the SH we had originally is almost the same as the one we can generate using corner points and interpolation, let's throw it out.
                                     // lock all the verts
                                     toRemove.Add(i);
-                                    foreach (var vIndex in originalIndices
-                                    ) // originalIndices already excludes the point we are removing (i), so we just add the whole array to the lock set for this pass
+                                    foreach (var vIndex in
+                                        originalIndices) // originalIndices already excludes the point we are removing (i), so we just add the whole array to the lock set for this pass
                                     {
                                         locked.Add(
                                             vIndex
@@ -1170,8 +1247,8 @@ namespace Appalachia.Lighting.Probes
 
                     if ((perProbeError.Count == 0) ||
                         (probePositions.Length <= probeBudget) ||
-                        ((errorTolerance != -1.0f) && (toRemove.Count == 0))
-                    ) // keep optimizing until we stop removing points.
+                        ((errorTolerance != -1.0f) &&
+                         (toRemove.Count == 0))) // keep optimizing until we stop removing points.
                     {
                         break;
                     }
@@ -1180,7 +1257,11 @@ namespace Appalachia.Lighting.Probes
                     perProbeError.Sort();
 
                     // Take half the probes away at a time
-                    var errorIndex = Mathf.Clamp(perProbeError.Count - probeBudget, 0, perProbeError.Count - 1);
+                    var errorIndex = Mathf.Clamp(
+                        perProbeError.Count - probeBudget,
+                        0,
+                        perProbeError.Count - 1
+                    );
                     errorTolerance = (perProbeError[errorIndex] + perProbeError[0]) * 0.5f;
                 }
 
@@ -1237,7 +1318,7 @@ namespace Appalachia.Lighting.Probes
             var terrains = Terrain.activeTerrains;
 
             for (var i = p.Count - 1; i >= 0; i--)
-            {            
+            {
                 if (!allowAboveTerrain && !allowBelowTerrain)
                 {
                     if (!terrains.IsPositionGroundedOnTerrain(p[i]))
