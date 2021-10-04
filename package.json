@@ -1,7 +1,7 @@
 {
   "name": "com.appalachia.unity3d.lighting",
   "displayName": "Appalachia.Lighting for Unity3D",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "unity": "2020.3",
   "description": "Lighting and occlusion utilities for Unity3D.",
   "keywords": [
